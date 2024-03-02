@@ -19,9 +19,6 @@ on:
       DOCKERHUB_TOKEN:
         required: true
         description: 'Token for Docker Hub authentication'
-      DOCKERHUB_IMAGE_TOKEN:
-        required: true
-        description: 'Token for Docker Hub image'
       SSH_HOST:
         required: true
         description: 'SSH host for deployment'
