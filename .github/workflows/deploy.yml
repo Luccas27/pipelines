@@ -19,18 +19,18 @@ jobs:
       - name: ☁️ Checkout Repository
         uses: actions/checkout@v4
 
-      - name: 🗝️ Install SSH client
-        run: sudo apt-get install -y openssh-client
+      - name: 🗝️ Configure ssh connection
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} -t rsa ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.SSH_KEY }}"
 
       - name: 😎 Deploy to production server
         env:
-          PRIVATE_KEY: ${{ secrets.SSH_KEY }}
-          HOST: ${{ secrets.SSH_HOST }}
-          USER: ${{ secrets.SSH_USER }}
-          REMOTE_DEPLOYMENT_PATH: ${{secrets.REMOTE_DEPLOYMENT_PATH}}
+          DOCKER_HOST: ssh://${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PORT }}
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          echo "$PRIVATE_KEY" > private_key.pem
-          chmod 600 private_key.pem
-          scp -i private_key.pem -r . $USER@$HOST:$REMOTE_DEPLOYMENT_PATH
-          ssh -i private_key.pem -t $USER@$HOST "cd $REMOTE_DEPLOYMENT_PATH && docker-compose down -v && docker-compose pull && docker compose -f docker-compose.prod.yml up -d"
-          rm -f private_key.pem
+          docker compose -f docker-compose.prod.yml down -v || true && docker compose pull && docker compose -f docker-compose.prod.yml up -d
