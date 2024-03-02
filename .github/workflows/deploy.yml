@@ -33,4 +33,6 @@ jobs:
           DOCKER_HOST: ssh://${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PORT }}
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          docker compose -f docker-compose.prod.yml down -v || true && docker compose pull && docker compose -f docker-compose.prod.yml up -d
+          docker compose -f docker-compose.prod.yml down -v || true \
+          && docker compose -f docker-compose.prod.yml pull \
+          && docker compose -f docker-compose.prod.yml up -d
