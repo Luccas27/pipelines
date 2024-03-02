@@ -9,7 +9,7 @@ on:
         required: true
       SSH_USER:
         required: true
-      REMOTE_DEPLOYMENT_PATH:
+      SSH_PORT:
         required: true
 jobs:
   deploy:
