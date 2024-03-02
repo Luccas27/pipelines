@@ -1,5 +1,3 @@
-name: 🔍 CodeQL
-
 on:
   schedule:
     - cron: '0 7 * * 1'
@@ -10,6 +8,7 @@ on:
         type: string
 jobs:
   analyze:
+    name: 🔍 CodeQL
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:

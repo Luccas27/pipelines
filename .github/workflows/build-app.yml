@@ -1,12 +1,11 @@
-name: 🏗️ Build App
-
 on:
   workflow_call:
     secrets:
       DOTENV_KEY:
         required: false
 jobs:
-  app-build:
+  build-app:
+    name: 🏗️ Build App
     runs-on: ubuntu-latest
     timeout-minutes: 10
 

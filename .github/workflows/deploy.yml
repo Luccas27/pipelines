@@ -1,5 +1,3 @@
-name: 📦 Deploy build
-
 on:
   workflow_call:
     secrets:
@@ -17,6 +15,7 @@ on:
         required: false
 jobs:
   deploy:
+    name: 📦 Deploy build
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
