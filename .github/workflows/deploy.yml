@@ -1,0 +1,36 @@
+name: 📦 Deploy build
+
+on:
+  workflow_call:
+    secrets:
+      SSH_KEY:
+        required: true
+      SSH_HOST:
+        required: true
+      SSH_USER:
+        required: true
+      REMOTE_DEPLOYMENT_PATH:
+        required: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: ☁️ Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🗝️ Install SSH client
+        run: sudo apt-get install -y openssh-client
+
+      - name: 😎 Deploy to production server
+        env:
+          PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+          HOST: ${{ secrets.SSH_HOST }}
+          USER: ${{ secrets.SSH_USER }}
+          REMOTE_DEPLOYMENT_PATH: ${{secrets.REMOTE_DEPLOYMENT_PATH}}
+        run: |
+          echo "$PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          scp -i private_key.pem -r . $USER@$HOST:$REMOTE_DEPLOYMENT_PATH
+          ssh -i private_key.pem -t $USER@$HOST "cd $REMOTE_DEPLOYMENT_PATH && docker-compose down -v && docker-compose pull && docker compose -f docker-compose.prod.yml up -d"
+          rm -f private_key.pem
