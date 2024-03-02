@@ -20,8 +20,9 @@ jobs:
 
       - name: 📦 Install dependencies
         uses: bahmutov/npm-install@v1
-        env:
-          NODE_ENV: production
+
+      - name: 🔧 Remove dev dependencies
+        run: npm prune --production
 
       - name: 🏗️ Build Application
         env:
