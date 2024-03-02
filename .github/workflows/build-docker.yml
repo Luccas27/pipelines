@@ -10,7 +10,7 @@ on:
       DOCKER_IMAGE_NAME:
         required: true
 jobs:
-  docker-build:
+  docker-build-push:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
