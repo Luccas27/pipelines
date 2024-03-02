@@ -11,6 +11,7 @@ jobs:
     name: 🔍 CodeQL
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions: write-all
     strategy:
       fail-fast: false
       matrix:
