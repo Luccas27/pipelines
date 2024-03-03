@@ -39,15 +39,15 @@ jobs:
       - name: 🔍 Run tests
         run: npm run test --if-present
 
-      - name: 🔍 Initialize CodeQL
+      - name: 🔍 CodeQL - Initialize
         uses: github/codeql-action/init@v3
         with:
           languages: javascript-typescript
 
-      - name: 📦 Autobuild
+      - name: 📦 CodeQL - Autobuild
         uses: github/codeql-action/autobuild@v3
 
-      - name: 🔍 Perform CodeQL Analysis
+      - name: 🔍 CodeQL - Perform Analysis
         uses: github/codeql-action/analyze@v3
         with:
           category: '/language:javascript-typescript'
