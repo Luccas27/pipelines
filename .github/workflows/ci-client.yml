@@ -1,0 +1,89 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+        description: 'Environment for deployment'
+
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: 🧑‍💻 Lint
+    runs-on: ubuntu-latest
+    environment: ${{inputs.environment}}
+    timeout-minutes: 10
+    steps:
+      - name: ☁️ Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 🔧 Install npm@latest
+        run: npm i -g npm@latest
+
+      - name: 📦 Install dependencies
+        uses: bahmutov/npm-install@v1
+
+      - name: 🔍 Lint Code Base
+        run: npm run lint --if-present
+
+  test:
+    name: 🧪 Test
+    runs-on: ubuntu-latest
+    environment: ${{inputs.environment}}
+    timeout-minutes: 10
+    needs: lint
+    steps:
+      - name: ☁️ Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 📦 Install dependencies
+        uses: bahmutov/npm-install@v1
+
+      - name: 🔍 Run tests
+        run: npm run test --if-present
+
+  codeQL:
+    name: 🔍 CodeQL
+    runs-on: ubuntu-latest
+    environment: ${{inputs.environment}}
+    timeout-minutes: 10
+    needs: test
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - javascript-typescript
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:javascript-typescript'
