@@ -61,8 +61,8 @@ jobs:
         env:
           DOTENV_KEY: ${{ secrets.DOTENV_KEY }}
         run: |
-          npm prune --production
           npm run build
+          npm run prune --omit=dev
 
       - name: 🦈 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
