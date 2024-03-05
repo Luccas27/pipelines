@@ -39,8 +39,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  cd:
-    name: 🚀 Continous Deployment
+  ci:
+    name: 🧑‍💻 Continous Integration
     environment: ${{inputs.environment}}
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -56,6 +56,25 @@ jobs:
 
       - name: 📦 Install dependencies
         uses: bahmutov/npm-install@v1
+
+      - name: 🔍 Lint Code Base
+        run: npm run lint --if-present
+
+      - name: 🔍 Run tests
+        run: npm run test --if-present
+
+      - name: 🔍 CodeQL - Initialize
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: 📦 CodeQL - Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: 🔍 CodeQL - Perform Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:javascript-typescript'
 
       - name: 🏗️ Build Application
         env:
@@ -81,6 +100,23 @@ jobs:
           tags: ${{ inputs.docker_image_tag }}
           platforms: linux/amd64,linux/arm64
 
+  deploy-to-qa:
+    name: 🚀 Deploy to QA
+    environment: Staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: ☁️ Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 📦 Install dependencies
+        uses: bahmutov/npm-install@v1
+
       - name: 🗝️ Configure ssh connection
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
@@ -90,11 +126,46 @@ jobs:
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
           ssh-add - <<< "${{ secrets.SSH_KEY }}"
 
-      - name: 😎 Deploy to remote server
+      - name: 😎 Deploy to QA
         env:
           DOCKER_HOST: ssh://${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PORT }}
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          docker compose -f ${{inputs.dockercompose_filename}} down -v || true \
-          && docker compose -f ${{inputs.dockercompose_filename}} pull \
-          && docker compose -f ${{inputs.dockercompose_filename}} up -d
+          docker compose -f docker-compose.dev.yml down -v || true \
+          && docker compose -f docker-compose.dev.yml pull \
+          && docker compose -f docker-compose.dev.yml up -d
+
+  deploy-to-prod:
+    name: 🚀 Deploy to PROD
+    environment: Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: ☁️ Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 📦 Install dependencies
+        uses: bahmutov/npm-install@v1
+
+      - name: 🗝️ Configure ssh connection
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} -t rsa ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.SSH_KEY }}"
+
+      - name: 😎 Deploy to production
+        env:
+          DOCKER_HOST: ssh://${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PORT }}
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          docker compose -f docker-compose.prod.yml down -v || true \
+          && docker compose -f docker-compose.prod.ymlpull \
+          && docker compose -f docker-compose.prod.yml up -d
