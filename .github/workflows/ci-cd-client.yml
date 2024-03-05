@@ -40,6 +40,7 @@ on:
 
 jobs:
   ci:
+    if: ${{ github.event_name == 'pull_request' && github.event.action == 'opened' || github.event.action == 'edited' ||github.event.action == 'synchronize' || github.event.action == 'reopened' }}
     name: 🧑‍💻 Continous Integration
     environment: ${{inputs.environment}}
     runs-on: ubuntu-latest
@@ -101,6 +102,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
 
   deploy-to-qa:
+    if: ${{ github.event_name == 'pull_request' && github.event.action == 'opened' || github.event.action == 'edited' ||github.event.action == 'synchronize' || github.event.action == 'reopened' }}
     name: 🚀 Deploy to QA
     environment: Staging
     runs-on: ubuntu-latest
