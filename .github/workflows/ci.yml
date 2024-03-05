@@ -50,7 +50,6 @@ jobs:
 
       - name: 🏗️ Build Application
         env:
-          environment: ${{inputs.environment}}
           DOTENV_KEY: ${{ secrets.DOTENV_KEY }}
         run: |
           npm run build
