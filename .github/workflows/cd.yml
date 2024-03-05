@@ -1,0 +1,87 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+        description: 'Environment for deployment'
+      docker-compose-filename:
+        type: string
+        required: true
+        description: 'Docker compose file to run'
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: true
+        description: 'Username for Docker Hub'
+      DOCKERHUB_TOKEN:
+        required: true
+        description: 'Token for Docker Hub authentication'
+      SSH_HOST:
+        required: true
+        description: 'SSH host for deployment'
+      SSH_KEY:
+        required: true
+        description: 'SSH private key for deployment'
+      SSH_USER:
+        required: true
+        description: 'SSH username for deployment'
+      SSH_PORT:
+        required: true
+        description: 'SSH port for deployment'
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: 🚀 Deploy
+    environment: ${{inputs.environment}}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: ☁️ Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 📦 Install dependencies
+        uses: bahmutov/npm-install@v1
+
+      - name: 🗝️ Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 🗝️ Configure ssh connection
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} -t rsa ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.SSH_KEY }}"
+
+      - name: 🔍 CodeQL - Initialize
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: 📦 CodeQL - Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: 🔍 CodeQL - Perform Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:javascript-typescript'
+
+      - name: 😎 Deploy
+        env:
+          DOCKER_HOST: ssh://${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PORT }}
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          docker compose -f ${{inputs.docker-compose-filename}} down -v || true \
+          && docker compose -f ${{inputs.docker-compose-filename}} pull \
+          && docker compose -f ${{inputs.docker-compose-filename}} up -d
