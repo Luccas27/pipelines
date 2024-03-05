@@ -1,14 +1,5 @@
 on:
   workflow_call:
-    inputs:
-      environment:
-        type: string
-        required: true
-        description: 'Environment for deployment'
-      docker-compose-filename:
-        type: string
-        required: true
-        description: 'Docker compose file to run'
     secrets:
       DOCKERHUB_USERNAME:
         required: true
@@ -28,13 +19,10 @@ on:
       SSH_PORT:
         required: true
         description: 'SSH port for deployment'
-
   workflow_dispatch:
-
 jobs:
   deploy:
     name: 🚀 Deploy
-    environment: ${{inputs.environment}}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -82,6 +70,6 @@ jobs:
           DOCKER_HOST: ssh://${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PORT }}
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          docker compose -f ${{inputs.docker-compose-filename}} down -v || true \
-          && docker compose -f ${{inputs.docker-compose-filename}} pull \
-          && docker compose -f ${{inputs.docker-compose-filename}} up -d
+          docker compose -f docker-compose.prod.yml down -v || true \
+          && docker compose -f docker-compose.prod.yml pull \
+          && docker compose -f docker-compose.prod.yml up -d
