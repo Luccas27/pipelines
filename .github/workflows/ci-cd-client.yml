@@ -40,7 +40,7 @@ on:
 
 jobs:
   ci:
-    if: ${{ github.event_name == 'pull_request' && github.event.action == 'opened' || github.event.action == 'edited' ||github.event.action == 'synchronize' || github.event.action == 'reopened' }}
+    if: ${{ github.event_name == 'pull_request' && inputs.environment == 'Staging' && github.event.action == 'opened' || github.event.action == 'synchronize' }}
     name: 🧑‍💻 Continous Integration
     environment: ${{inputs.environment}}
     runs-on: ubuntu-latest
@@ -102,9 +102,9 @@ jobs:
           platforms: linux/amd64,linux/arm64
 
   deploy-to-qa:
-    if: ${{ github.event_name == 'pull_request' && github.event.action == 'opened' || github.event.action == 'edited' ||github.event.action == 'synchronize' || github.event.action == 'reopened' }}
+    if: ${{ github.event_name == 'pull_request' && inputs.environment == 'Staging' && github.event.action == 'opened' || github.event.action == 'synchronize' }}
     name: 🚀 Deploy to QA
-    environment: Staging
+    environment: ${{inputs.environment}}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -138,9 +138,9 @@ jobs:
           && docker compose -f docker-compose.dev.yml up -d
 
   deploy-to-prod:
-    if: ${{ github.event_name == 'push' &&  github.ref == 'refs/heads/main'}}
+    if: ${{ github.event_name == 'push' && inputs.environment == 'Production' &&  github.ref == 'refs/heads/main'}}
     name: 🚀 Deploy to PROD
-    environment: Production
+    environment: ${{inputs.environment}}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
