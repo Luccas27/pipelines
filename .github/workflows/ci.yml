@@ -1,12 +1,5 @@
 on:
   workflow_call:
-    secrets:
-      DOCKERHUB_USERNAME:
-        required: true
-        description: 'Username for Docker Hub'
-      DOCKERHUB_TOKEN:
-        required: true
-        description: 'Token for Docker Hub authentication'
     inputs:
       environment:
         type: string
