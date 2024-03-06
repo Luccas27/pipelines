@@ -14,7 +14,16 @@ on:
         type: string
         required: true
         description: 'Image name and tag to be deployed to docker'
-
+    secrets:
+      DOTENV_KEY:
+        required: false
+        description: 'Secret for .env file'
+      DOCKERHUB_USERNAME:
+        required: true
+        description: 'Username for Docker Hub'
+      DOCKERHUB_TOKEN:
+        required: true
+        description: 'Token for Docker Hub authentication'
 jobs:
   ci:
     runs-on: ubuntu-latest

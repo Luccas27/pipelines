@@ -1,9 +1,6 @@
 on:
   workflow_call:
     secrets:
-      DOTENV_KEY:
-        required: false
-        description: 'Secret for .env file'
       DOCKERHUB_USERNAME:
         required: true
         description: 'Username for Docker Hub'
