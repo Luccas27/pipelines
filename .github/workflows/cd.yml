@@ -19,12 +19,21 @@ on:
       SSH_PORT:
         required: true
         description: 'SSH port for deployment'
-  workflow_dispatch:
+    inputs:
+      environment:
+        type: string
+        required: true
+        default: Staging
+      dockercompose_filename:
+        type: string
+        required: true
+        default: docker-compose.dev.yml
 jobs:
   deploy:
-    name: 🚀 Deploy
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    environment: ${{inputs.environment}}
+
     steps:
       - name: ☁️ Checkout Repository
         uses: actions/checkout@v4
@@ -65,11 +74,11 @@ jobs:
         with:
           category: '/language:javascript-typescript'
 
-      - name: 😎 Deploy
+      - name: 🚀 Deploy
         env:
           DOCKER_HOST: ssh://${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PORT }}
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          docker compose -f docker-compose.prod.yml down -v || true \
-          && docker compose -f docker-compose.prod.yml pull \
-          && docker compose -f docker-compose.prod.yml up -d
+          docker compose -f ${{inputs.dockercompose_filename}} down -v || true \
+          && docker compose -f ${{inputs.dockercompose_filename}} pull \
+          && docker compose -f ${{inputs.dockercompose_filename}} up -d
