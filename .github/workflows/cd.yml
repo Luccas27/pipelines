@@ -1,6 +1,9 @@
 on:
   workflow_call:
     secrets:
+      DOTENV_KEY:
+        required: false
+        description: 'Secret for .env file'
       DOCKERHUB_USERNAME:
         required: true
         description: 'Username for Docker Hub'
@@ -77,6 +80,7 @@ jobs:
       - name: 🚀 Deploy
         env:
           DOCKER_HOST: ssh://${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_PORT }}
+          DOTENV_KEY: ${{secrets.DOTENV_KEY}}
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
           docker compose -f ${{inputs.dockercompose_filename}} down -v || true \
