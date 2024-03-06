@@ -31,6 +31,15 @@ on:
         type: string
         required: true
         default: docker-compose.dev.yml
+      target:
+        type: string
+        required: true
+        default: dev
+        description: 'Sets the target stage in dockerfile to build'
+      docker_image_tag:
+        type: string
+        required: true
+        description: 'Image name and tag to be deployed to docker'
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -55,6 +64,16 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: 📦 Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          build-args: ${{secrets.DOTENV_KEY}}
+          target: ${{inputs.target}}
+          push: true
+          tags: ${{ inputs.docker_image_tag }}
+          platforms: linux/amd64,linux/arm64
+
       - name: 🗝️ Configure ssh connection
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
@@ -76,6 +95,8 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: '/language:javascript-typescript'
+      - name: 🦈 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: 🚀 Deploy
         env:
