@@ -7,12 +7,6 @@ on:
       DOCKERHUB_TOKEN:
         required: true
         description: 'Token for Docker Hub authentication'
-      GPG_PUBLIC_KEY:
-        required: true
-        description: 'Key for secrets'
-      GPG_PRIVATE_KEY:
-        required: true
-        description: 'Key for secrets'
       SSH_HOST:
         required: true
         description: 'SSH host for deployment'
@@ -64,32 +58,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: 🗝️ Setup GPG
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gnupg
-
-      - name: 🗝️ Setup SOPS
-        run: |
-          curl -LO https://github.com/getsops/sops/releases/download/v3.8.1/sops-v3.8.1.linux.amd64
-          mv sops-v3.8.1.linux.amd64 /usr/local/bin/sops
-          chmod +x /usr/local/bin/sops
-
-      - name: 🗝️ Retrieve secrets
-        env:
-          SOPS_GPG_PUBLIC_KEY: ${{ secrets.GPG_PUBLIC_KEY }}
-          SOPS_GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-        run: |
-          echo "$SOPS_GPG_PRIVATE_KEY" > private_key.rsa
-          gpg --import private_key.rsa
-          rm private_key.rsa
-          for file in .env.*.enc; do
-              if [ -f "$file" ]; then
-                  sops --decrypt \
-                  --pgp "$SOPS_GPG_PUBLIC_KEY" \
-                  "$file" > "${file%.enc}"
-              fi
-          done
 
       - name: 🚀 Deploy
         env:
