@@ -28,6 +28,7 @@ on:
         required: true
 jobs:
   deploy:
+    name: 🚀 Deploy
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: ${{inputs.environment}}

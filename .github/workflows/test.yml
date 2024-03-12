@@ -3,6 +3,7 @@ on:
 
 jobs:
   test:
+    name: 🧪 Lint | Test | Vulnerability scan
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
