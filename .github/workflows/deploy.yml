@@ -7,6 +7,12 @@ on:
       DOCKERHUB_TOKEN:
         required: true
         description: 'Token for Docker Hub authentication'
+      GPG_PUBLIC_KEY:
+        required: true
+        description: 'Key for secrets'
+      GPG_PRIVATE_KEY:
+        required: true
+        description: 'Key for secrets'
       SSH_HOST:
         required: true
         description: 'SSH host for deployment'
