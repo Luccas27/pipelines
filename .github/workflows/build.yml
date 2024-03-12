@@ -11,8 +11,6 @@ on:
         required: true
       GPG_PRIVATE_KEY:
         required: true
-      NGINX_PORT:
-        required: true
     inputs:
       target:
         type: string
