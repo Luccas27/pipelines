@@ -31,8 +31,6 @@ jobs:
 
       - name: 🔍 CodeQL - Initialize
         uses: github/codeql-action/init@v3
-        with:
-          languages: javascript-typescript
 
       - name: 📦 CodeQL - Autobuild
         uses: github/codeql-action/autobuild@v3
