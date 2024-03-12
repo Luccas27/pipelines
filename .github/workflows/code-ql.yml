@@ -3,34 +3,37 @@ on:
     inputs:
       language:
         type: string
-        default: javascript-typescript
+        default: 'javascript-typescript'
   schedule:
     - cron: '05 20 * * 2'
 jobs:
-  test:
+  analyze:
     name: 🔍 Vulnerability scan
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
     strategy:
       fail-fast: false
       matrix:
-        language: ${{inputs.language}}
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-
+        language:
+          - ${{inputs.language}}
     steps:
       - name: ☁️ Checkout Repository
         uses: actions/checkout@v4
 
-      - name: 🔍 CodeQL - Initialize
+      # Initializes the CodeQL tools for scanning.
+      - name: 🔍 Initialize CodeQL
         uses: github/codeql-action/init@v3
-
-      - name: 📦 CodeQL - Autobuild
+        with:
+          languages: ${{ matrix.language }}
+      - name: 📦 Autobuild CodeQL
         uses: github/codeql-action/autobuild@v3
 
-      - name: 🔍 CodeQL - Perform Analysis
+      - name: 🔍 Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
           category: '/language:${{matrix.language}}'
