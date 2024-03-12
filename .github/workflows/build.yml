@@ -21,9 +21,6 @@ on:
       environment:
         type: string
         default: Staging
-      nginx_port:
-        type: number
-        required: true
 jobs:
   build:
     name: 📦 Build
