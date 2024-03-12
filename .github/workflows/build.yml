@@ -5,8 +5,6 @@ on:
         required: true
       DOCKERHUB_TOKEN:
         required: true
-      DOCKER_IMAGE_NAME:
-        required: true
       GPG_PUBLIC_KEY:
         required: true
       GPG_PRIVATE_KEY:
