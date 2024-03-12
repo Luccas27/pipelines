@@ -1,14 +1,10 @@
 on:
   workflow_call:
-    inputs:
-      environment:
-        type: string
-        default: Staging
+
 jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    environment: ${{inputs.environment}}
     permissions:
       actions: read
       contents: read

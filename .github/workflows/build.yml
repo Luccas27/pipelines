@@ -13,18 +13,18 @@ on:
       target:
         type: string
         default: 'prod'
-      docker_image_tag:
+      node_env:
+        type: string
+        default: staging
+        required: true
+      app_name:
         type: string
         required: true
-      environment:
-        type: string
-        default: Staging
 jobs:
   build:
     name: 📦 Build
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    environment: ${{inputs.environment}}
     steps:
       - name: ☁️ Checkout Repository
         uses: actions/checkout@v4
@@ -68,35 +68,12 @@ jobs:
               fi
           done
 
-      - name: 🏗️ Build Application
-        run: |
-          if [ "${{ inputs.environment }}" = "Production" ]; then
-            npm run build
-          else
-            npm run build:staging
-          fi
-
-      - name: 📁 Archive build output
-        uses: actions/upload-artifact@v4
-        with:
-          name: build
-          path: dist
-          if-no-files-found: error
-
-      - name: 📁 Download build output
-        uses: actions/download-artifact@v4
-        with:
-          name: build
-          path: dist
-
-      - name: 👓 Display structure of downloaded files
-        run: ls -R dist
-
-      - name: 📦 Build and push Docker image
+      - name: 📦 Build/Push Image
         uses: docker/build-push-action@v5
         with:
           context: .
-          target: ${{inputs.target}}
+          target: prod
           push: true
-          tags: ${{ inputs.docker_image_tag }}
+          tags: lucas2708/${{ inputs.app_name }}:${{inputs.node_env}}
           platforms: linux/amd64,linux/arm64
+          build-args: NODE_ENV=${{inputs.node_env}}
