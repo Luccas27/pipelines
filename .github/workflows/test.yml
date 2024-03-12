@@ -3,7 +3,7 @@ on:
     inputs:
       environment:
         type: string
-        required: true
+        default: Staging
 jobs:
   test:
     runs-on: ubuntu-latest

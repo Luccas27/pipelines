@@ -22,7 +22,7 @@ on:
     inputs:
       environment:
         type: string
-        required: true
+        default: Staging
       dockercompose_filename:
         type: string
         required: true

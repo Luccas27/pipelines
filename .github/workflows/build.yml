@@ -22,7 +22,7 @@ on:
         required: true
       environment:
         type: string
-        required: true
+        default: Staging
       nginx_port:
         type: number
         required: true
